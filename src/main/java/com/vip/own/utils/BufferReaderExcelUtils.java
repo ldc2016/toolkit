@@ -21,30 +21,29 @@ import com.vip.own.entity.MothBillsEntity;
 /**
  * Created by dacheng.liu on 2017/5/26.
  */
-public class ExcelUtils {
+public class BufferReaderExcelUtils {
     public static void main(String[] args) throws IOException {
-        String srcFile = "D:\\新客账单数据0526.xlsx";
-        String dstFile = "D:\\新客账单数据0526_records_1.xlsx";
-//        String txtFilePath = "D:\\vipshop_finance_month_bills.txt";
-        String txtFilePath = "D:\\data1.txt";
+        String srcFile = "D:\\新客账单数据0606.xlsx";
+        String dstFile = "D:\\新客账单数据0606_records.xlsx";
+        String txtFilePath = "D:\\vipshop_finance_month_bills.csv";
+        
+//        XSSFWorkbookType poifsFileSystem =  new POIFSFileSystem(is);
         
         InputStream is = new FileInputStream(srcFile);
-//        XSSFWorkbookType poifsFileSystem =  new POIFSFileSystem(is);
-
+        OutputStream os = new FileOutputStream(dstFile);
+       
         XSSFWorkbook dstWorkBook = new XSSFWorkbook(is);
         XSSFSheet sheet0 = dstWorkBook.getSheetAt(0);
-
         XSSFCellStyle cellStyle = dstWorkBook.createCellStyle();
         cellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-        OutputStream os = new FileOutputStream(dstFile);
         
-        BufferedReader bufferedReader = FileReaderUtils.initFileReader(txtFilePath);
+        final BufferedReader bufferedReader = FileReaderUtils.initFileReader(txtFilePath);
+        final MothBillsEntity mothBillsEntity = new MothBillsEntity();
 
         int recorCcounts  = 0;
         int rowNum = 1;
         while(true){
-            MothBillsEntity mothBillsEntity = getMonthBillsEntity(bufferedReader);
-            if(mothBillsEntity == null){
+            if(!getMonthBillsEntity(bufferedReader,mothBillsEntity)){
                 break;
             }
 
@@ -56,7 +55,6 @@ public class ExcelUtils {
         }
 
         dstWorkBook.write(os);
-
         System.out.println("本次导出记录数为： " + recorCcounts);
 
     }
@@ -232,12 +230,10 @@ public class ExcelUtils {
 
     }
 
-    private static MothBillsEntity getMonthBillsEntity(BufferedReader bufferedReader) {
+    private static boolean getMonthBillsEntity(final BufferedReader bufferedReader,final MothBillsEntity mothBillsEntity) {
         String metaData = FileReaderUtils.getMetaData(bufferedReader);
-        MothBillsEntity mothBillsEntity = null;
         if(StringUtils.isNotBlank(metaData)){
             String[] monthBillMetaDatas = metaData.split(",");
-            mothBillsEntity = new MothBillsEntity();
             mothBillsEntity.setCreateUser(monthBillMetaDatas[0]);
             mothBillsEntity.setCreateTime(monthBillMetaDatas[1]);
             mothBillsEntity.setUpdateUser(monthBillMetaDatas[2]);
@@ -264,8 +260,13 @@ public class ExcelUtils {
             mothBillsEntity.setCurrCanStagingAmount(monthBillMetaDatas[23]);
             mothBillsEntity.setCurrNoStagingAmount(monthBillMetaDatas[24]);
             mothBillsEntity.setUid(monthBillMetaDatas[25]);
+            
+            metaData = null;                // 方便GC回收
+            monthBillMetaDatas = null;      // 方便GC回收
+        }else{
+        	return false;
         }
-        return mothBillsEntity;
+        return true;
     }
 
 }
