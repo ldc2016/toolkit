@@ -18,7 +18,7 @@ public class ThreadPoolLearnTest {
 		System.out.println("------------ ThreadPoolLearnTest , currActiveThreadCount -------------->  ：" + currActiveThreadCount);
 		
 		// 初始化50个工作线程
-		for (int i = 0; i < 500; i++) {
+		for (int i = 0; i < 100; i++) {
 			TestWorkThread testTask = new TestWorkThread();
 			threadPoolExecutor.submit(testTask);
 		}
@@ -27,6 +27,7 @@ public class ThreadPoolLearnTest {
 		System.out.println("------------ ThreadPoolLearnTest , after add task into queue currActiveThreadCount -------------->  ：" + currActiveThreadCount);
 		
 		Thread.currentThread().sleep(30*1000);
+		
 		
 		// 修改线程池核心线程数量
 		threadPoolExecutor.setCorePoolSize(2);
